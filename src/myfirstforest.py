@@ -8,11 +8,14 @@ please see packages.python.org/milk/randomforests.html for more
 import pandas as pd
 import numpy as np
 import csv as csv
+import datetime
 from sklearn.ensemble import RandomForestClassifier
+
+now = datetime.datetime.now()
 
 # Data cleanup
 # TRAIN DATA
-train_df = pd.read_csv('train.csv', header=0)        # Load the train file into a dataframe
+train_df = pd.read_csv('../data/train.csv', header=0)        # Load the train file into a dataframe
 
 # I need to convert all strings to integer classifiers.
 # I need to fill in the missing values of the data and make it complete.
@@ -41,7 +44,7 @@ train_df = train_df.drop(['Name', 'Sex', 'Ticket', 'Cabin', 'PassengerId'], axis
 
 
 # TEST DATA
-test_df = pd.read_csv('test.csv', header=0)        # Load the test file into a dataframe
+test_df = pd.read_csv('../data/test.csv', header=0)        # Load the test file into a dataframe
 
 # I need to do the same with the test data now, so that the columns are the same as the training data
 # I need to convert all strings to integer classifiers:
@@ -54,7 +57,6 @@ if len(test_df.Embarked[ test_df.Embarked.isnull() ]) > 0:
     test_df.Embarked[ test_df.Embarked.isnull() ] = test_df.Embarked.dropna().mode().values
 # Again convert all Embarked strings to int
 test_df.Embarked = test_df.Embarked.map( lambda x: Ports_dict[x]).astype(int)
-
 
 # All the ages with no data -> make the median of all Ages
 median_age = test_df['Age'].dropna().median()
@@ -88,8 +90,10 @@ forest = forest.fit( train_data[0::,1::], train_data[0::,0] )
 print 'Predicting...'
 output = forest.predict(test_data).astype(int)
 
+now_string = now.strftime("%Y-%m-%d--%H-%M")
+predictions_file_name = "../results/forest-" + now_string + ".csv"
 
-predictions_file = open("myfirstforest.csv", "wb")
+predictions_file = open(predictions_file_name, "wb")
 open_file_object = csv.writer(predictions_file)
 open_file_object.writerow(["PassengerId","Survived"])
 open_file_object.writerows(zip(ids, output))
